@@ -1,0 +1,5 @@
+/bb
+/storage-ac-*
+/storage-cas-*
+/worker
+/runner/ssh/id*

@@ -1,0 +1,109 @@
+version: '3'
+services:
+  frontend:
+    image: buildbarn/bb-storage:20220118T100705Z-cd279b2
+    command:
+    - /config/frontend.jsonnet
+    expose:
+    - 9980
+    ports:
+    - 7980:7980
+    - 8980:8980
+    volumes:
+    - ./config:/config
+
+
+  storage-0:
+    image: buildbarn/bb-storage:20220118T100705Z-cd279b2
+    command:
+    - /config/storage.jsonnet
+    expose:
+    - 8981
+    - 9980
+    ports:
+    - 7981:7981
+    volumes:
+    - ./config:/config
+    - ./storage-ac-0:/storage-ac
+    - ./storage-cas-0:/storage-cas
+
+  storage-1:
+    image: buildbarn/bb-storage:20220118T100705Z-cd279b2
+    command:
+    - /config/storage.jsonnet
+    expose:
+    - 8981
+    - 9980
+    ports:
+    - 17981:7981
+    volumes:
+    - ./config:/config
+    - ./storage-ac-1:/storage-ac
+    - ./storage-cas-1:/storage-cas
+
+
+  scheduler:
+    image: buildbarn/bb-scheduler:20211222T101503Z-592ecb3
+    command:
+    - /config/scheduler.jsonnet
+    expose:
+    - 8982
+    - 8983
+    - 9980
+    ports:
+    - 7982:7982
+    volumes:
+    - ./config:/config
+
+  browser:
+    image: buildbarn/bb-browser:20211222T121123Z-547095c
+    command:
+    - /config/browser.jsonnet
+    expose:
+    - 9980
+    ports:
+    - 7984:7984
+    volumes:
+    - ./config:/config
+
+  remote-assets:
+    image: buildbarn/bb-remote-asset:20210514T144202Z-6a6e6f9
+    command:
+    - /config/remote-asset.jsonnet
+    expose:
+    - 9000
+    ports:
+    - 9000:9000
+    volumes:
+    - ./config:/config
+
+  worker:
+    image: buildbarn/bb-worker:20220126T175529Z-d1a65e0
+    command:
+    - /config/worker.jsonnet
+    ports:
+    - 7986:7986
+    volumes:
+    - ./config:/config
+    - ./worker:/worker
+
+  runner:
+    image: docker.nix-community.org/nixpkgs/nix@sha256:9a9ae02e8855700530ae803dac5d12625194914bd4a07fba713f72bf49faa3cf
+    command:
+    - sh
+    - -c
+    - "while ! test -f /bb/installed; do sleep 1; done; nix-shell --pure /shell/shell.nix --command 'cp -r /ssh /root/.ssh && chown -R root: /root/.ssh && exec /bb/tini -v -g -- /bb/bb_runner /config/runner.jsonnet'"
+    volumes:
+    - ./runner/shell:/shell
+    - ./runner/ssh:/ssh:ro
+    - ./worker:/worker
+    - ./config:/config
+    - ./bb:/bb
+    - $HOME/.cache/bazel/_bazel_$USER:$HOME/.cache/bazel/_bazel_$USER:ro
+    depends_on:
+    - runner-installer
+
+  runner-installer:
+    image: buildbarn/bb-runner-installer:20220126T175529Z-d1a65e0
+    volumes:
+    - ./bb:/bb

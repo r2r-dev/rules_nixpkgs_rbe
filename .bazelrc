@@ -1,0 +1,7 @@
+build --remote_cache=grpc://localhost:8980
+build --experimental_remote_downloader=grpc://localhost:9000
+build --remote_timeout=3600
+build --experimental_repo_remote_exec
+build --strategy=remote
+build --remote_instance_name=""
+build --noremote_upload_local_results
