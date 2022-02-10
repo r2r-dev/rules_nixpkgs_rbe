@@ -28,7 +28,7 @@ cat runner/ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 # Term2@repository_root/buildbarn
 ./run.sh
 ```
-7. Open Buildbarn Scheduler UI by heading to `localhost:7892` in a web browser
+7. Open Buildbarn Scheduler UI by heading to http://localhost:7982/ in a web browser
 8. Wait for Buildbarn stack to finish setting up. Once it's done you should see 8 idle workers in Buildbarn Scheduler UI.
 Note: this page does not refresh by itself.
 9. Head back to first terminal window and execute build commands:
